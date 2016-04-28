@@ -3,12 +3,13 @@ angular.module("firebase.transactionManager", [])
 	.service('FirebaseTransactionManager', FirebaseTransactionManager);
 
 function FirebaseTransactionManager($firebaseObject) {
+	this.recordChanges = recordChanges;
 	/**
 	 * start to observe a firebase Ref
 	 *
-	 * @param {Firebase}  firebaseRef
+	 * @param {$firebaseObject}  firebaseObject
 	 */
-	function recordChanges(firebaseRef, options) {
+	function recordChanges(dataObject, snapshotRef, options) {
 		var self = {};
 
 		//expose public methods
@@ -18,53 +19,80 @@ function FirebaseTransactionManager($firebaseObject) {
 		self.canRestorePrevious = canRestorePrevious;
 		self.restorePrevious = restorePrevious;
 		self.hasSnapshot = hasSnapshot;
+		self.saveAndSnap = saveAndSnap;
 		self.clear = clear;
 
 		//configure snapshot object and options
 		var defaults = {
 			remote: true
 		};
-
-		options = angular.extend(options, defaults);
-		var object = $firebaseObject(firebaseRef);
+		var relativeRef = dataObject.$ref()
+			.toString()
+			.replace(dataObject.$ref()
+				.root()
+				.toString(), '');
+		options = angular.extend(defaults, options);
+		var object = dataObject;
+		var snap = $firebaseObject(snapshotRef.child(relativeRef));
 
 		//TODO: implement optional snapshot path configuration
-		var snapshotRef = 'snapshot';
+		// var snapshotRef = 'snapshot';
+		//
+		// if (!options.remote) {
+		// 	snapshotRef = '$' + snapshotRef;
+		// }
 
-		if (!options.remote) {
-			snapshotRef = '$' + snapshotRef;
+
+		/**
+		 * Perform a save on firebase
+		 *
+		 */
+		function saveSnap() {
+			if (options.remote) {
+				return snap.$save();
+			}
 		}
 
-		snapshotRef = object[snapshotRef];
+		function save() {
+			return object.$save();
+		}
+
+		function saveAndSnap() {
+			snapshot();
+			save();
+		}
+
 		/**
 		 * Perform a rollback
 		 *
-		 * @param {Object}  object
 		 */
 		function doRollback() {
-			var lastSnapshot = snapshotRef[snapshotRef.length - 1];
+			var lastSnapshot = snap.history[snap.history.length - 1];
 
 			angular.forEach(object, function (val, key) {
 				if (key != "snapshot") {
 					object[key] = lastSnapshot[key];
 				}
 			});
+
+			save();
+			saveSnap();
 		}
 
 		/**
 		 * Take a snapshot of an object
-		 * @param {Object}  object
 		 */
 		function snapshot() {
 			var tmp;
 
 			if (!hasSnapshot()) { // has no snapshots yet
-				snapshotRef = [angular.copy(object)];
+				snap.history = [angular.copy(object)];
 			} else if (isChanged()) { // has snapshots and is changed since last version
 				tmp = angular.copy(object);
-				delete tmp.snapshot;
-				snapshotRef.push(tmp);
+				snap.history.push(tmp);
 			}
+
+			saveSnap();
 		}
 
 		/**
@@ -79,22 +107,20 @@ function FirebaseTransactionManager($firebaseObject) {
 
 		/**
 		 * Check if can restore previous
-		 * @param object
 		 * @returns {boolean}
 		 */
 		function canRestorePrevious() {
-			return hasSnapshot() && snapshotRef.length > 1;
+			return hasSnapshot() && snap.history.length > 1;
 		}
 
 		/**
 		 * Restore previous snapshot
 		 * Resets object to state before last snapshot
 		 *
-		 * @param {Object}  object
 		 */
 		function restorePrevious() {
 			if (hasSnapshot()) {
-				snapshotRef.pop();
+				snap.history.pop();
 				doRollback();
 			}
 		}
@@ -102,28 +128,26 @@ function FirebaseTransactionManager($firebaseObject) {
 		/**
 		 * Remove all snapshots
 		 *
-		 * @param {Object}  object
 		 */
 		function clear() {
 			if (hasSnapshot()) {
-				snapshotRef = [];
+				snap.history = [];
 			}
+			saveSnap();
 		}
 
 		/**
 		 * Check if passed object has a snapshot
 		 *
-		 * @param {Object} object
 		 * @returns {boolean}
 		 */
 		function hasSnapshot() {
-			return snapshotRef !== undefined && snapshotRef.length !== 0;
+			return snap && snap.history && snap.history.length;
 		}
 
 		/**
 		 * Can perform a rollback,
 		 * returns true in case has a snapshot and actual state is different from last snapshot
-		 * @param object
 		 * @returns {boolean}
 		 */
 		function canRollback() {
@@ -133,7 +157,6 @@ function FirebaseTransactionManager($firebaseObject) {
 		/**
 		 * Check if object was changed since last snapshot
 		 *
-		 * @param {object}  object
 		 * @returns {boolean}
 		 */
 
@@ -141,7 +164,7 @@ function FirebaseTransactionManager($firebaseObject) {
 			var changed = false;
 
 			angular.forEach(object, function (val, key) {
-				if (key != "snapshot" && object[key] != snapshotRef[snapshotRef.length - 1][key]) {
+				if (key != "snapshot" && object[key] != snap.history[snap.history.length - 1][key]) {
 					changed = true;
 				}
 			});
@@ -152,5 +175,5 @@ function FirebaseTransactionManager($firebaseObject) {
 		return self;
 	}
 
-
+	return this;
 }

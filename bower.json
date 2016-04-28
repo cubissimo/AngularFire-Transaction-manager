@@ -1,11 +1,11 @@
 {
-  "name": "angular-transaction-manager",
-  "version": "1.1.0",
-  "homepage": "https://github.com/marco64bit/Angular-Transaction-manager",
+  "name": "AngularFire-Transaction-manager",
+  "version": "0.0.1",
+  "homepage": "https://github.com/cubissimo/AngularFire-Transaction-manager",
   "authors": [
-    "Marco Pretelli <lordscapoladestra@gmail.com>"
+    "Diego Cubissimo <diegocubissimo@gmail.com>"
   ],
-  "description": "track history of scope object, do rollback, navigate through previus version, stop transaction etc...",
+  "description": "track the history of a $firebaseObject, store versions in firebase, do rollback, undo, redo, go to a specific version and etc",
   "main": "scr/transactionManager.js",
   "keywords": [
     "angular",
@@ -15,7 +15,13 @@
     "version",
     "scope",
     "traking",
-    "copy"
+    "copy",
+    "undo",
+    "redo",
+    "version",
+    "versioning",
+    "firebase",
+    "angularfire"
   ],
   "license": "MIT",
   "dependencies": {

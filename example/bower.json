@@ -1,5 +1,5 @@
 {
-  "name": "Transaction Manager example",
+  "name": "Angular Fire Transaction Manager example",
   "version": "0.0.1",
   "dependencies": {
     "angular": "^1.5.5",
