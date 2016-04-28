@@ -1,126 +1,179 @@
 'use strict';
-angular.module("transactionManager", []).service('TransactionManager', TransactionManager);
+angular.module("firebase.transactionManager", [])
+	.service('FirebaseTransactionManager', FirebaseTransactionManager);
 
-function TransactionManager() {
-    this.snapshot           = snapshot;
-    this.canRollback        = canRollback;
-    this.rollback           = rollback;
-    this.canRestorePrevious = canRestorePrevious;
-    this.restorePrevious    = restorePrevious;
-    this.hasSnapshot        = hasSnapshot;
-    this.clear              = clear;
+function FirebaseTransactionManager($firebaseObject) {
+	this.recordChanges = recordChanges;
+	/**
+	 * start to observe a firebase Ref
+	 *
+	 * @param {$firebaseObject}  firebaseObject
+	 */
+	function recordChanges(dataObject, snapshotRef, options) {
+		var self = {};
 
-    /**
-     * Perform a rollback
-     *
-     * @param {Object}  object
-     */
-    function doRollback(object) {
-        var lastSnapshot = object.snapshot[object.snapshot.length - 1];
+		//expose public methods
+		self.snapshot = snapshot;
+		self.canRollback = canRollback;
+		self.rollback = rollback;
+		self.canRestorePrevious = canRestorePrevious;
+		self.restorePrevious = restorePrevious;
+		self.hasSnapshot = hasSnapshot;
+		self.saveAndSnap = saveAndSnap;
+		self.clear = clear;
 
-        angular.forEach(object, function(val, key) {
-            if(key != "snapshot") {
-                object[key] = lastSnapshot[key];
-            }
-        });
-    }
+		//configure snapshot object and options
+		var defaults = {
+			remote: true
+		};
+		var relativeRef = dataObject.$ref()
+			.toString()
+			.replace(dataObject.$ref()
+				.root()
+				.toString(), '');
+		options = angular.extend(defaults, options);
+		var object = dataObject;
+		var snap = $firebaseObject(snapshotRef.child(relativeRef));
 
-    /**
-     * Take a snapshot of an object
-     * @param {Object}  object
-     */
-    function snapshot(object) {
-        var tmp;
+		//TODO: implement optional snapshot path configuration
+		// var snapshotRef = 'snapshot';
+		//
+		// if (!options.remote) {
+		// 	snapshotRef = '$' + snapshotRef;
+		// }
 
-        if (!hasSnapshot(object)) { // has no snapshots yet
-            object.snapshot = [angular.copy(object)];
-        } else if (isChanged(object)) { // has snapshots and is changed since last version
-            tmp = angular.copy(object);
-            delete tmp.snapshot;
-            object.snapshot.push(tmp);
-        }
-    }
 
-    /**
-     * Perform a rollback
-     * @param object
-     */
-    function rollback(object) {
-        if (hasSnapshot(object)) {
-            doRollback(object);
-        }
-    }
+		/**
+		 * Perform a save on firebase
+		 *
+		 */
+		function saveSnap() {
+			if (options.remote) {
+				return snap.$save();
+			}
+		}
 
-    /**
-     * Check if can restore previous
-     * @param object
-     * @returns {boolean}
-     */
-    function canRestorePrevious(object) {
-        return hasSnapshot(object) && object.snapshot.length > 1;
-    }
+		function save() {
+			return object.$save();
+		}
 
-    /**
-     * Restore previous snapshot
-     * Resets object to state before last snapshot
-     *
-     * @param {Object}  object
-     */
-    function restorePrevious(object) {
-        if (hasSnapshot(object)) {
-            object.snapshot.pop();
-            doRollback(object);
-        }
-    }
+		function saveAndSnap() {
+			snapshot();
+			save();
+		}
 
-    /**
-     * Remove all snapshots
-     *
-     * @param {Object}  object
-     */
-    function clear(object) {
-        if (hasSnapshot(object)) {
-            object.snapshot = [];
-        }
-    }
+		/**
+		 * Perform a rollback
+		 *
+		 */
+		function doRollback() {
+			var lastSnapshot = snap.history[snap.history.length - 1];
 
-    /**
-     * Check if passed object has a snapshot
-     *
-     * @param {Object} object
-     * @returns {boolean}
-     */
-    function hasSnapshot(object) {
-        return object.snapshot != undefined && object.snapshot.length != 0;
-    }
+			angular.forEach(object, function (val, key) {
+				if (key != "snapshot") {
+					object[key] = lastSnapshot[key];
+				}
+			});
 
-    /**
-     * Can perform a rollback,
-     * returns true in case has a snapshot and actual state is different from last snapshot
-     * @param object
-     * @returns {boolean}
-     */
-    function canRollback(object) {
-        return hasSnapshot(object) && isChanged(object);
-    }
+			save();
+			saveSnap();
+		}
 
-    /**
-     * Check if object was changed since last snapshot
-     *
-     * @param {object}  object
-     * @returns {boolean}
-     */
-    function isChanged(object) {
-        var changed = false;
+		/**
+		 * Take a snapshot of an object
+		 */
+		function snapshot() {
+			var tmp;
 
-        angular.forEach(object, function(val, key) {
-            if (key != "snapshot" && object[key] != object.snapshot[object.snapshot.length - 1][key]) {
-                changed = true;
-            }
-        });
+			if (!hasSnapshot()) { // has no snapshots yet
+				snap.history = [angular.copy(object)];
+			} else if (isChanged()) { // has snapshots and is changed since last version
+				tmp = angular.copy(object);
+				snap.history.push(tmp);
+			}
 
-        return changed;
-    }
+			saveSnap();
+		}
 
-    return this;
+		/**
+		 * Perform a rollback
+		 * @param object
+		 */
+		function rollback() {
+			if (hasSnapshot()) {
+				doRollback();
+			}
+		}
+
+		/**
+		 * Check if can restore previous
+		 * @returns {boolean}
+		 */
+		function canRestorePrevious() {
+			return hasSnapshot() && snap.history.length > 1;
+		}
+
+		/**
+		 * Restore previous snapshot
+		 * Resets object to state before last snapshot
+		 *
+		 */
+		function restorePrevious() {
+			if (hasSnapshot()) {
+				snap.history.pop();
+				doRollback();
+			}
+		}
+
+		/**
+		 * Remove all snapshots
+		 *
+		 */
+		function clear() {
+			if (hasSnapshot()) {
+				snap.history = [];
+			}
+			saveSnap();
+		}
+
+		/**
+		 * Check if passed object has a snapshot
+		 *
+		 * @returns {boolean}
+		 */
+		function hasSnapshot() {
+			return snap && snap.history && snap.history.length;
+		}
+
+		/**
+		 * Can perform a rollback,
+		 * returns true in case has a snapshot and actual state is different from last snapshot
+		 * @returns {boolean}
+		 */
+		function canRollback() {
+			return hasSnapshot() && isChanged();
+		}
+
+		/**
+		 * Check if object was changed since last snapshot
+		 *
+		 * @returns {boolean}
+		 */
+
+		function isChanged() {
+			var changed = false;
+
+			angular.forEach(object, function (val, key) {
+				if (key != "snapshot" && object[key] != snap.history[snap.history.length - 1][key]) {
+					changed = true;
+				}
+			});
+
+			return changed;
+		}
+
+		return self;
+	}
+
+	return this;
 }

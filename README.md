@@ -1,30 +1,32 @@
-Angular Transaction Manager
+Firebase Transaction Manager
 ================================================
-Angularjs Module that allows to make snapshots of an object, perform a rollback and restore snapshot version.
+Angularjs Module that depends from <a href="https://www.firebase.com/docs/web/libraries/angular/" target="_blank"> AngularFire </a> allows to make snapshots of an $firebaseObject, store versions in firebase, do rollback, go to prev version, undo, redo, go to a specific version and much more...
+
+this repo is a fork of awesome https://github.com/marco64bit/Angular-Transaction-manager
 
 <h3>Install</h3>
 
 <h4>Bower</h4>
 ```sh
-bower install angular-transaction-manager
+bower install firebase-transaction-manager --save
 ```
 
-include transactionManager.js in your application
+include firebase.transactionManager.js in your application
 
 ```html
- <script src="scripts/transactionManager.js"></script>
+ <script src="scripts/firebase.transactionManager.js"></script>
 ```
 
-add transactionManager to your angular module
+add firebase.transactionManager to your angular module
 
 ```js
-var app = angular.module('myApp', ['transactionManager']);
+var app = angular.module('myApp', ['firebase.transactionManager']);
 ```
 
 
 <h3> try demo </h3>
 
-<a href="https://jsfiddle.net/marco_pretelli/3t9agkqy/1/" target="_blank"> Live demo! </a>
+`not yet.. comming...`
 
 or Open example folder and run
 <pre>
@@ -35,12 +37,11 @@ or Open example folder and run
 
 run grunt server in example folder
 
-
 <h1>API</h1>
 
-works only with $scope object (not with primitives) like this
+works only with $firebaseObject (not with primitives) like this
 ```js
-$scope.foo = {};
+var obj = $firebaseObject(ref);
 ```
 <br>
 <b>TransactionManager.snapshot</b>
@@ -50,7 +51,7 @@ $scope.foo = {a: 1, b: "test"};
 TransactionManager.snapshot($scope.foo);
 ```
 the result object contains a key snapshot
-```js 
+```js
 {a: 1, b: "test", snapshot: [{a: 1, b: "test"}]}
 ```
 you can call snapshot() more than 1 time, the result object will contain a list of all snapshot

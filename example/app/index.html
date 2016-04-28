@@ -31,27 +31,30 @@
         <div ng-controller="MainCtrl" class="hero-unit">
             <h3>Transaction Manager</h3>
 
-            <button class="btn" ng-click="myHistory.snapshot(foo)">Make a snapshot</button>
-            <button class="btn" ng-show="myHistory.hasSnapshot(foo)" ng-click="myHistory.clear(foo)">Clear all snapshots</button>
+            <button class="btn" ng-click="myHistory.snapshot()">Make a snapshot</button>
+            <button class="btn" ng-show="myHistory.hasSnapshot()" ng-click="myHistory.clear(foo)">Clear all snapshots</button>
             <br>
             {{foo.name}} : {{foo.age}}
             <br>
             <input ng-model="foo.name" placeholder="Name">
             <input type="number" ng-model="foo.age" placeholder="Age">
             <br>
-            <button class="btn" ng-show="myHistory.canRollback(foo)" ng-click="myHistory.rollback(foo)">Rollback</button>
-            <button class="btn" ng-show="myHistory.canRestorePrevious(foo)" ng-click="myHistory.restorePrevious(foo)">Restore previous state</button>
+            <button class="btn" ng-show="myHistory.canRollback()" ng-click="myHistory.rollback()">Rollback</button>
+            <button class="btn" ng-show="myHistory.canRestorePrevious()" ng-click="myHistory.restorePrevious()">Restore previous state</button>
+            <button class="btn" ng-click="myHistory.saveAndSnap()">Snapshot and Save</button>
             <!-- all snapshots -->
-            <div ng-show="myHistory.hasSnapshot(foo)">
+            <div ng-show="myHistory.hasSnapshot()">
                 <b>Snapshots:</b>
-                <div ng-repeat="snapshot in foo.snapshot">
-                    <div>{{ snapshot }}</div>
+                <div ng-repeat="snapshot in snaps">
+                    <div>{{ snapshot | json }}</div>
                 </div>
             </div>
         </div>
 
 
         <script src="bower_components/angular/angular.js"></script>
+        <script src="bower_components/firebase/firebase.js"></script>
+        <script src="bower_components/angularfire/dist/angularfire.js"></script>
         <script src="scripts/app.js"></script>
 
         <script src="scripts/transactionManager.js"></script>
