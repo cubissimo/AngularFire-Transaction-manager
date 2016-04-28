@@ -8,13 +8,13 @@ this repo is a fork of awesome https://github.com/marco64bit/Angular-Transaction
 
 <h4>Bower</h4>
 ```sh
-bower install firebase-transaction-manager --save
+bower install firebase-transaction-manager --save `(not yet deployed)`
 ```
 
 include firebase.transactionManager.js in your application
 
 ```html
- <script src="scripts/firebase.transactionManager.js"></script>
+ <script src="scripts/transactionManager.js"></script>
 ```
 
 add firebase.transactionManager to your angular module
@@ -24,7 +24,7 @@ var app = angular.module('myApp', ['firebase.transactionManager']);
 ```
 
 
-<h3> try demo </h3>
+<h3> try online demo </h3>
 
 `not yet.. comming...`
 
@@ -36,6 +36,9 @@ or Open example folder and run
 </pre>
 
 run grunt server in example folder
+
+
+//////// doc deprecated... to be updated. ////////
 
 <h1>API</h1>
 
