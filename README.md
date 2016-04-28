@@ -8,7 +8,7 @@ this repo is a fork of awesome https://github.com/marco64bit/Angular-Transaction
 
 <h4>Bower</h4>
 ```sh
-bower install angularfire-transaction-manager --save
+bower install AngularFire-Transaction-manager --save
 ```
 
 include firebase.transactionManager.js in your application
