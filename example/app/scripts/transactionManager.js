@@ -33,7 +33,7 @@ function FirebaseTransactionManager($firebaseObject) {
 				.toString(), '');
 		options = angular.extend(defaults, options);
 		var object = dataObject;
-		var snap = $firebaseObject(snapshotRef.child(relativeRef));
+		var snap = $firebaseObject(snapshotRef.child(unescape(relativeRef)));
 
 		//TODO: implement optional snapshot path configuration
 		// var snapshotRef = 'snapshot';

@@ -33,15 +33,24 @@ function FirebaseTransactionManager($firebaseObject) {
 				.toString(), '');
 		options = angular.extend(defaults, options);
 		var object = dataObject;
-		var snap = $firebaseObject(snapshotRef.child(relativeRef));
+		var snap = {};
 
-		//TODO: implement optional snapshot path configuration
-		// var snapshotRef = 'snapshot';
-		//
-		// if (!options.remote) {
-		// 	snapshotRef = '$' + snapshotRef;
-		// }
+		object.$loaded(init);
 
+		function init() {
+			if (options.remote) {
+				snap = $firebaseObject(snapshotRef.child(unescape(relativeRef)));
+				snap.$loaded(initSnaps);
+			} else {
+				initSnaps();
+			}
+		}
+
+		function initSnaps() {
+			if (!snap.history || !snap.history.length) {
+				snapshot();
+			}
+		}
 
 		/**
 		 * Perform a save on firebase
@@ -59,7 +68,7 @@ function FirebaseTransactionManager($firebaseObject) {
 
 		function saveAndSnap() {
 			snapshot();
-			save();
+			return save();
 		}
 
 		/**
@@ -70,7 +79,7 @@ function FirebaseTransactionManager($firebaseObject) {
 			var lastSnapshot = snap.history[snap.history.length - 1];
 
 			angular.forEach(object, function (val, key) {
-				if (key != "snapshot") {
+				if (key !== 'snapshot') {
 					object[key] = lastSnapshot[key];
 				}
 			});
