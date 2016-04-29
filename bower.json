@@ -1,12 +1,16 @@
 {
   "name": "AngularFire-Transaction-manager",
+  "description": "track the history of a $firebaseObject, store versions in firebase, do rollback, undo, redo, go to a specific version and etc",
   "version": "0.0.1",
-  "homepage": "https://github.com/cubissimo/AngularFire-Transaction-manager",
   "authors": [
     "Diego Cubissimo <diegocubissimo@gmail.com>"
   ],
-  "description": "track the history of a $firebaseObject, store versions in firebase, do rollback, undo, redo, go to a specific version and etc",
-  "main": "scr/transactionManager.js",
+  "homepage": "https://github.com/cubissimo/AngularFire-Transaction-manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cubissimo/AngularFire-Transaction-manager.git"
+  },
+  "license": "MIT",
   "keywords": [
     "angular",
     "transaction",
@@ -23,7 +27,13 @@
     "firebase",
     "angularfire"
   ],
-  "license": "MIT",
+  "main": "scr/firebase.transactionManager.js",
+  "ignore": [
+    "**/*",
+    "!src/*.js",
+    "!README.md",
+    "!LICENSE"
+  ],
   "dependencies": {
     "firebase": "^2.4.2",
     "firebase-util": "^0.2.5",
