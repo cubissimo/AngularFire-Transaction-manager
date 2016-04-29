@@ -1,6 +1,6 @@
 {
-  "name": "prova",
-  "version": "0.0.0",
+  "name": "angularfire-transaction-manager",
+  "version": "0.0.1",
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.1",
