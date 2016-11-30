@@ -28,8 +28,8 @@ function FirebaseTransactionManager($firebaseObject) {
 		};
 		var relativeRef = dataObject.$ref()
 			.toString()
-			.replace(dataObject.$ref()
-				.root()
+			.replace(firebase.database()
+				.ref()
 				.toString(), '');
 		options = angular.extend(defaults, options);
 		var object = dataObject;
